@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="mg-canoe:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="mg-canoe.war">
+      <element id="artifact" artifact-name="mg-canoe:war exploded" />
+    </root>
+  </artifact>
+</component>

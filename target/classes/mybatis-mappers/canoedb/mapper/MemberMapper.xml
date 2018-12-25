@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hworld.canoe.dao.MemberMapper">
+
+	<resultMap id="BaseResultMap" type="com.hworld.canoe.domain.req.entity.Player">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="first_name" property="firstName" jdbcType="VARCHAR" />
+		<result column="last_name" property="lastName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="mail" property="mail" jdbcType="VARCHAR" />
+		<result column="club_id" property="clubId" jdbcType="INTEGER" />
+		<result column="club_name" property="clubName" jdbcType="VARCHAR" />
+		<result column="is_seed" property="isSeed" jdbcType="INTEGER" />
+		<result column="id_type" property="idType" jdbcType="VARCHAR" />
+		<result column="id_no" property="idNo" jdbcType="VARCHAR" />
+		<result column="birthday" property="birthday" jdbcType="DATE" />
+		<result column="gender" property="gender" jdbcType="CHAR" />
+		<result column="wechat_no" property="wechatNo" jdbcType="VARCHAR" />
+		<result column="wechat_openid" property="wechatOpenid" jdbcType="VARCHAR" />
+		<result column="brand_id" property="brandId" jdbcType="INTEGER" />
+		<result column="country" property="country" jdbcType="INTEGER" />
+		<result column="province" property="province" jdbcType="INTEGER" />
+		<result column="register_channel" property="registerChannel" jdbcType="VARCHAR" />
+		<result column="register_time" property="registerTime" jdbcType="TIMESTAMP" />
+		<result column="status" property="status" jdbcType="VARCHAR" />
+		<result column="current_compete_point" property="currentCompetePoint" jdbcType="DECIMAL" />
+		<result column="current_finish_point" property="currentFinishPoint" jdbcType="DECIMAL" />
+		<result column="total_compete_point" property="totalCompetePoint" jdbcType="DECIMAL" />
+		<result column="total_finish_point" property="totalFinishPoint" jdbcType="DECIMAL" />
+		<result column="password_hash" property="passwordHash" jdbcType="VARCHAR" />
+		<result column="password_salt" property="passwordSalt" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+		<result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+		<result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<!-- 会员列表出参 -->
+	<sql id="baseMember">
+		a.id,
+		CASE WHEN a.gender = 'M' THEN '男'
+			 WHEN a.gender = 'F' THEN '女'
+		END as gender,
+		a.`name`,
+		a.mobile,
+		b.club_name,
+		a.total_compete_point,
+		a.total_finish_point,
+		CASE WHEN a.`status` = 'F' THEN '初始'
+			 WHEN a.`status` = 'E' THEN '活跃'
+			 WHEN a.`status` = 'X' THEN '注销'
+		END as status,
+		a.is_seed
+	</sql>
+	
+	<!-- 多条件查询 -->
+	<select id="findAllMemberByCondition" resultMap="BaseResultMap">
+		select DISTINCT
+		<include refid="baseMember" />
+		from player a left join club b on a.club_id = b.id
+		where 1 = 1
+		<if test="map.keyword != null and map.keyword != ''">
+			and a.name like '%${map.keyword}%' or a.mobile like '%${map.keyword}%' or a.id = #{map.keyword}
+		</if>
+		<if test="map.startDate != null and map.startDate != ''">
+			and a.register_time >= #{map.startDate}
+		</if>
+		<if test="map.endDate != null and map.endDate != ''">
+			and a.register_time &lt;= #{map.endDate}
+		</if>
+		<if test="map.gender != null and map.gender != ''">
+			and a.gender = #{map.gender}
+		</if>
+		<if test="map.isSeed != null and map.isSeed != ''">
+			and a.is_seed = #{map.isSeed}
+		</if>
+		<if test="map.clubId != null and map.clubId != ''">
+			and a.club_id = #{map.clubId}
+		</if>
+		<if test="map.status != null and map.status != ''">
+			and a.`status` = #{map.status}
+		</if>
+		and a.deleted_flag = 0
+	</select>
+
+	<!-- 修改状态(置为黑榜或取消黑榜 0不是1是) -->
+	<update id="updateStatus">
+		update player
+		<set>
+			<if test="status == 0">
+				is_seed = 1
+			</if>
+			<if test="status == 1">
+				is_seed = 0
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<!-- 注销(将初始或活跃状态改为注销状态) -->
+	<update id="logout">
+		update player
+		<set>
+			<if test='status == "F"'>
+				`status` = 'X'
+			</if>
+			<if test='status == "E"'>
+				`status` = 'X'
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<!-- 查询会员详情信息 -->
+	<select id="findMemberDetail" resultType="com.hworld.canoe.domain.req.vo.member.MemberDetailOutParam">
+		select DISTINCT
+			a.`name` AS memberName,
+			CASE WHEN a.gender = 'M' THEN '男'
+				 WHEN a.gender = 'F' THEN '女'
+			END as gender,
+			a.wechat_openid AS wechatOpenid,
+			a.mobile,
+			a.id_no AS idNo,
+			CASE WHEN a.id_type = 'ID_CARD' THEN '身份证'
+				 WHEN a.id_type = 'PASSPORT' THEN '护照'
+			END as idType,
+			(SELECT TIMESTAMPDIFF(YEAR, a.birthday, CURDATE())) as age,
+			CASE WHEN a.country = 1 THEN '中国'
+				 WHEN a.country = 43916 THEN '中国台湾'
+				 WHEN a.country = 43919 THEN '中国香港'
+				 WHEN a.country = 43922 THEN '中国澳门'
+			END as country,
+			j.`name` as province,
+			b.club_name AS clubName,
+			c.brand_name AS zzh,
+			CASE WHEN a.is_seed = 0 THEN '否'
+				 WHEN a.is_seed = 1 THEN '是'
+			END as isSeed,
+			a.total_compete_point AS totalCompetePoint,
+			a.total_finish_point AS totalFinishPoint,
+			d.`name` AS equipmentxName1,
+			e.`name` AS typeName,
+			c.brand_name AS brandName,
+			a.id,
+			CASE WHEN a.`status` = 'F' THEN '初始'
+			     WHEN a.`status` = 'E' THEN '活跃'
+			     WHEN a.`status` = 'X' THEN '注销'
+			END as statue,
+			a.register_channel AS registerChannel,
+			a.register_time AS registerTime,
+			a.modified_by AS modifiedBy,
+			h.`name` AS raceName,
+			h.race_date AS raceDate,
+			g.group_name AS groupName,
+			f.finsh_time AS finshTime,
+			i.competition_point AS competitionPoint,
+			i.finish_point AS finishPoint,
+			e.`name` AS chooseTypeName,
+			d.`name` AS equipmentName2,
+			c.brand_name AS brand,
+			f.rank
+		from player a
+			left join club b on a.club_id = b.id
+			left join brand c on a.brand_id = c.id
+			left join xsports_equipmentx d on d.brand_id = a.brand_id
+			left join equipment_type e on d.equipment_category_id = e.id
+			left join race_competition f on f.player_id = a.id
+			left join race_group g on f.race_group_id = g.id
+			left join race h on h.id = g.race_id
+			left join player_point i on i.player_id = a.id
+			left join area j ON j.id = b.area_id
+		where a.id = #{id}
+	</select>
+
+	<!-- 根据id查询会员信息 -->
+	<select id="findMemberById" resultType="com.hworld.canoe.domain.req.vo.member.MemberDetailOutParamIn">
+		select DISTINCT
+			a.id as memberId,
+			a.`name`,
+			CASE WHEN a.gender = 'M' THEN '男'
+				 WHEN a.gender = 'F' THEN '女'
+			END as gender,
+			a.mobile,
+			CASE WHEN a.country = 1 THEN '中国'
+				 WHEN a.country = 43916 THEN '中国台湾'
+				 WHEN a.country = 43919 THEN '中国香港'
+				 WHEN a.country = 43922 THEN '中国澳门'
+			END as country,
+			a.country as countryId,
+			d.`name` AS countryName,
+			a.province as provinceId,
+			(select name from area where id = a.province) as provinceName,
+			CASE WHEN a.id_type = 'ID_CARD' THEN '身份证'
+				 WHEN a.id_type = 'PASSPORT' THEN '护照'
+			END as idType,
+			a.id_no as idNo,
+			a.club_id as clubId,
+			b.club_name as clubName,
+			a.brand_id as zzsId,
+			c.brand_name as zzsName,
+			f.id,
+			f.`name` as equipmentName,
+			e.brand_id as brandId,
+			c.brand_name as brandName,
+			a.remark
+		from player a,club b,brand c,area d,xsports_equipmentx e,equipment_type f
+		where a.club_id = b.id and a.brand_id = c.id and d.id = c.area_id and e.brand_id = a.brand_id and f.id = e.equipment_category_id
+		and a.id = #{id}
+	</select>
+
+	<!-- 新增会员 -->
+	<insert id="addMember" parameterType="java.util.Map">
+		insert into player
+		values(null,#{map.name},#{map.firstName},#{map.lastName},#{map.mobile},null,#{map.clubId},0,#{map.idType},#{map.idNo},null,
+		#{map.gender},null,null,#{map.brandId},#{map.country},#{map.province},'CRM',NOW(),'E',0,0,0,0,null,null,#{map.remark},0,'',NOW(),null,null);
+
+		insert into xsports_equipmentx
+		values(null,#{map.model},#{map.type},1,#{map.brand},0,'',NOW(),null,null)
+	</insert>
+	
+	<resultMap id="CountryResultMap" type="com.hworld.canoe.domain.req.entity.Area" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="en_name" property="enName" jdbcType="VARCHAR" />
+	    <result column="level_gap" property="levelGap" jdbcType="INTEGER" />
+	    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+	    <result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+	    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+	    <result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+	    <result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+	    <result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+  	</resultMap>
+	
+	<!-- 国籍下拉框多选择 -->
+	<select id="findCountryCondition" resultMap="CountryResultMap">
+		select DISTINCT a.id,a.`name`
+		from area a
+		where a.deleted_flag = 0 and a.parent_id = 0
+	</select>
+
+	<!-- 查询所有器材类型 -->
+	<select id="findAllEquipmentType" resultType="com.hworld.canoe.domain.req.vo.member.EquipmentTypeOutParam">
+		select DISTINCT a.id,a.`name`
+		from equipment_type a
+		where a.`status` = 1 and a.deleted_flag = 0
+	</select>
+
+	<!-- 根据器材类型id查询品牌信息 -->
+	<select id="findBrandInfoByTid" resultType="com.hworld.canoe.domain.req.vo.member.BrandOutParam">
+		select DISTINCT a.brand_name as brandName,a.id
+		from brand a,xsports_equipmentx b,equipment_type c
+		where b.brand_id = a.id and b.equipment_category_id = c.id and a.`status` = 1
+		and b.equipment_category_id = #{tid}
+	</select>
+
+	<!-- 查找所有赞助商 -->
+	<select id="findAllBrand" resultType="com.hworld.canoe.domain.req.vo.member.ZzsOutParam">
+		select DISTINCT a.id,a.brand_name as name
+		from brand a 
+		where a.`status` = 1 and a.deleted_flag = 0 and a.is_sponsor = 1
+	</select>
+
+	<!-- 查找所有省份 -->
+	<select id="findAllProvince" resultType="com.hworld.canoe.domain.req.vo.member.ProvinceOutParam">
+		select DISTINCT id as pid,`name` as pname
+		from area
+		where parent_id = 1 and deleted_flag = 0
+	</select>
+
+	<!-- 根据省份id查询城市信息 -->
+	<select id="findAllCityByPid" resultType="com.hworld.canoe.domain.req.vo.member.CityOutParam">
+		select DISTINCT id as cid,`name` as cname
+		from area
+		where parent_id = #{pid} and deleted_flag = 0
+	</select>
+
+	<!-- 修改会员 -->
+	<!-- 当修改会员的同时还向基础信息变更记录表中添加相应变动数据 -->
+	<update id="updateMember" parameterType="java.util.Map">
+		update player
+			<set>
+				<if test="map.name != null and map.name != ''">
+					`name` = #{map.name},
+				</if>
+				<if test="map.firstName != null and map.firstName != ''">
+					first_name = #{map.firstName},
+				</if>
+				<if test="map.lastName != null and map.lastName != ''">
+					last_name = #{map.lastName},
+				</if>
+				<if test="map.gender != null and map.gender != ''">
+					gender = #{map.gender},
+				</if>
+				<if test="map.mobile != null and map.mobile != ''">
+					mobile = #{map.mobile},
+				</if>
+				<if test="map.country != null and map.country != ''">
+					country = #{map.country},
+				</if>
+				<if test="map.province != null and map.province != ''">
+					province = #{map.province},
+				</if>
+				<if test="map.idType != null and map.idType != ''">
+					id_type = #{map.idType},
+				</if>
+				<if test="map.idNo != null and map.idNo != ''">
+					id_no = #{map.idNo},
+				</if>
+				<if test="map.clubId != null and map.clubId != ''">
+					club_id = #{map.clubId},
+				</if>
+				<if test="map.brandId != null and map.brandId != ''">
+					brand_id = #{map.brandId},
+				</if>
+				<if test="map.remark != null and map.remark != ''">
+					remark = #{map.remark}
+				</if>
+			</set>
+		where id = #{map.id};
+		
+		update player_prefer_equipment
+		<set>
+			<if test="map.equipmentTypeId != null and map.equipmentTypeId != ''">
+				equipment_type_id = #{map.equipmentTypeId},
+			</if>
+			<if test="map.equipmentBrandId != null and map.equipmentBrandId != ''">
+				equipment_brand_id = #{map.equipmentBrandId},
+			</if>
+			<if test="map.model != null and map.model != ''">
+				model = #{map.model}
+			</if>
+		</set>
+		where player_id = #{map.id};
+		
+		<if test="map.name != null and map.name != '' and map.name != map.oldValueName">
+			insert into player_basic_info_record 
+			values(NULL,#{map.id},'姓名',#{map.oldValueName},#{map.name},'CRM',null,0,'',default,default,default);
+		</if>
+		<if test="map.gender != null and map.gender != '' and map.gender != map.oldValueRelGender">
+			insert into player_basic_info_record 
+			values(NULL,#{map.id},'性别',#{map.oldValueGender},#{map.newValueGender},'CRM',null,0,'',default,default,default);
+		</if>
+		<if test="map.mobile != null and map.mobile != '' and map.mobile != map.oldValueMobile">
+			insert into player_basic_info_record 
+			values(NULL,#{map.id},'手机号',#{map.oldValueMobile},#{map.mobile},'CRM',null,0,'',default,default,default);
+		</if>
+		<if test="map.country != null and map.country != '' and map.country != map.oldValueCountry">
+			insert into player_basic_info_record 
+			values(NULL,#{map.id},'国籍',#{map.oldValueCountry},#{map.newValueCountry},'CRM',null,0,'',default,default,default);
+		</if>
+		<if test="map.idType != null and map.idType != '' and map.idType != map.oldValueRelIdType">
+			insert into player_basic_info_record 
+			values(NULL,#{map.id},'证件类型',#{map.oldValueIdType},#{map.newValueIdType},'CRM',null,0,'',default,default,default);
+		</if>
+		<if test="map.idNo != null and map.idNo != '' and map.idNo != map.oldValueIdNo">
+			insert into player_basic_info_record 
+			values(NULL,#{map.id},'证件号',#{map.oldValueIdNo},#{map.idNo},'CRM',null,0,'',default,default,default);
+		</if>
+		<if test="map.clubId != null and map.clubId != '' and map.clubId != map.oldValueClubId">
+			insert into player_basic_info_record 
+			values(NULL,#{map.id},'所属俱乐部',#{map.oldValueClubName},#{map.newValueClub},'CRM',null,0,'',default,default,default);
+		</if>
+		<if test="map.brandId != null and map.brandId != '' and map.brandId != map.oldValueBrandId">
+			insert into player_basic_info_record 
+			values(NULL,#{map.id},'赞助商',#{map.oldValueBrandName},#{map.newValueBrand},'CRM',null,0,'',default,default,default)
+		</if>
+	</update>
+	
+	<!-- 根据id查询到旧值 -->
+	<select id="findOldValueById" resultType="com.hworld.canoe.domain.req.vo.member.OldValueOutParam">
+		select DISTINCT
+			a.`name` as playerName,
+			a.gender as relGender,
+			CASE WHEN a.gender = 'M' THEN '男'
+				   WHEN a.gender = 'F' THEN '女'
+			END as gender,
+			a.mobile,
+			a.country,
+			d.`name` as countryName,
+			a.id_type as relIdType,
+			CASE WHEN a.id_type = 'PASSPORT' THEN '护照'
+				 WHEN a.id_type = 'ID_CARD' THEN '身份证'
+			END as idType,
+			a.id_no as idNo,
+			a.club_id as clubId,
+			b.club_name as clubName,
+			c.id as brandId,
+			c.brand_name as brandName
+		from player a,club b,brand c,area d
+		where a.club_id = b.id and a.brand_id = c.id and d.id = b.area_id
+		and a.id = #{id}
+	</select>
+	
+	<resultMap id="recordMap" type="com.hworld.canoe.domain.req.entity.PlayerBasicInfoRecord" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="player_id" property="playerId" jdbcType="BIGINT" />
+	    <result column="column_name" property="columnName" jdbcType="VARCHAR" />
+	    <result column="old_value" property="oldValue" jdbcType="VARCHAR" />
+	    <result column="new_value" property="newValue" jdbcType="VARCHAR" />
+	    <result column="channel_code" property="channelCode" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="remark" property="remark" jdbcType="VARCHAR" />
+	    <result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+	    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+	    <result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+	    <result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+	    <result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+  	</resultMap>
+
+	<!-- 查询所有基础信息变更记录 -->
+	<select id="findAllBaseInfoChangeRecordPage" resultMap="recordMap">
+		select DISTINCT a.id,
+			a.column_name,
+			a.old_value,
+			a.new_value,
+			a.remark,
+			a.channel_code,
+			a.created_on,
+			a.created_by,
+			b.name
+		from player_basic_info_record a left join player b on a.player_id = b.id
+		<where>
+			<if test="map.keyword != null and map.keyword != ''">
+				and b.`name` like '%${map.keyword}%' or b.mobile like '%${map.keyword}%' or b.id = #{map.keyword}
+			</if>
+			and a.deleted_flag = 0
+		</where>
+	</select>
+	
+	<!-- excel批量导入会员 -->
+	<insert id="addMemberByExcel" parameterType="com.hworld.canoe.domain.req.po.member.Member">
+		insert into player
+		values(null,#{member.name},null,null,#{member.mobile},null,#{member.clubId},0,#{member.idType},#{member.idNo},null,
+		#{member.gender},null,null,#{member.brandId},#{member.country},null,'CRM',NOW(),'F',0,0,0,0,null,null,#{member.remark},0,'',NOW(),null,null)
+	</insert>
+	
+	<!-- 根据国家名称得到国家id -->
+	<select id="findCountryId" resultType="java.lang.Integer">
+		select DISTINCT a.id
+		from area a
+		where a.deleted_flag = 0 and a.`name` = #{countryName}
+	</select>
+	
+	<!-- 根据俱乐部名称得到俱乐部id -->
+	<select id="findClubId" resultType="java.lang.Integer">
+		select DISTINCT a.club_id
+		from player a,club b
+		where b.deleted_flag = 0 and a.club_id = b.id and b.`status` = 1 and b.club_name = #{clubName}
+	</select>
+	
+	<!-- 根据赞助商名称得到赞助商id -->
+	<select id="findBrandId" resultType="java.lang.Integer">
+		select DISTINCT a.id
+		from brand a
+		where a.deleted_flag = 0 and a.`status` = 1 and a.brand_name = #{brandName}
+	</select>
+	
+	<!-- 根据国家id得到国家名称 -->
+	<select id="findCountryNameById" resultType="java.lang.String">
+		select DISTINCT a.`name`
+		from area a
+		where a.deleted_flag = 0 and a.id = #{id}
+	</select>
+	
+	<!-- 根据俱乐部id得到俱乐部名称 -->
+	<select id="findClubNameById" resultType="java.lang.String">
+		select DISTINCT a.club_name
+		from club a
+		where a.deleted_flag = 0 and a.id = #{id}
+	</select>
+	
+	<!-- 根据赞助商id得到赞助商名称 -->
+	<select id="findBrandNameById" resultType="java.lang.String">
+		select DISTINCT a.brand_name
+		from brand a
+		where a.deleted_flag = 0 and a.id = #{id}
+	</select>
+
+</mapper>

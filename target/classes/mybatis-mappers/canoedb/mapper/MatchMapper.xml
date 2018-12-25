@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hworld.canoe.dao.MatchMapper">
+
+	<resultMap id="BaseResultMap" type="com.hworld.canoe.domain.req.entity.Race" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="cityName" property="cityName" jdbcType="VARCHAR" />
+	    <result column="race_date" property="raceDate" jdbcType="VARCHAR" />
+	    <result column="race_end_date" property="raceEndDate" jdbcType="VARCHAR" />
+	    <result column="area_id" property="areaId" jdbcType="INTEGER" />
+	    <result column="address" property="address" jdbcType="VARCHAR" />
+	    <result column="organiser" property="organiser" jdbcType="VARCHAR" />
+	    <result column="status" property="status" jdbcType="VARCHAR" />
+	    <result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+	    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+	    <result column="created_on" property="createdOn" jdbcType="VARCHAR" />
+	    <result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+	    <result column="modified_on" property="modifiedOn" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 赛事列表(多条件) -->
+	<select id="findAllRaceByCondition" resultMap="BaseResultMap">
+		select DISTINCT
+			a.id,
+			a.`name`,
+			a.race_date,
+			a.area_id,
+			b.`name` as cityName,
+			a.address,
+			CASE WHEN a.`status` = 1 THEN '进行中'
+				 WHEN a.`status` = 0 THEN '已结束'
+			END as `status`,
+			a.modified_by,
+			a.modified_on
+		from race a left join area b on a.area_id = b.id
+		<where>
+			<if test="map.keyword != null and map.keyword != ''">
+				and a.`name` like '%${map.keyword}%'
+			</if>
+			and a.deleted_flag = 0
+		</where>
+	</select>
+	
+	<resultMap id="RaceSeasonResultMap" type="com.hworld.canoe.domain.req.entity.RaceSeason" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="begin_date" property="beginDate" jdbcType="DATE" />
+	    <result column="end_date" property="endDate" jdbcType="DATE" />
+	    <result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+	    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+	    <result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+	    <result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+	    <result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<!-- 查询所有赛季 -->
+	<select id="findAllRaceSeason" resultMap="RaceSeasonResultMap">
+		select DISTINCT a.id,a.`name`
+		from race_season a
+		where a.deleted_flag = 0
+	</select>
+	
+	<!-- 查询所有器材类型 -->
+	<select id="findAllEquipmentType" resultType="com.hworld.canoe.domain.req.vo.member.EquipmentTypeOutParam">
+		select DISTINCT a.id,a.`name`
+		from equipment_type a
+		where a.`status` = 1 and a.deleted_flag = 0
+	</select>
+	
+	<!-- 查找所有省份 -->
+	<select id="findAllProvince" resultType="com.hworld.canoe.domain.req.vo.member.ProvinceOutParam">
+		select DISTINCT id as pid,`name` as pname
+		from area
+		where parent_id = 1 and deleted_flag = 0
+	</select>
+
+	<!-- 根据省份id查询城市信息 -->
+	<select id="findAllCityByPid" resultType="com.hworld.canoe.domain.req.vo.member.CityOutParam">
+		select DISTINCT id as cid,`name` as cname
+		from area
+		where parent_id = #{pid} and deleted_flag = 0
+	</select>
+	
+	<!-- 新增赛事 -->
+	<insert id="addRace" parameterType="com.hworld.canoe.domain.req.po.match.RaceAddParamIn" useGeneratedKeys="true" keyProperty="raceId">
+		insert into race
+		values(NULL,#{raceName},#{tempDate},null,#{areaId},#{address},#{raceSeasonId},#{organiser},1,0,'',DEFAULT,null,null);
+	</insert>
+	
+	<!-- 新增赛事下的组 -->
+	<insert id="addRaceGroup" parameterType="com.hworld.canoe.domain.req.po.match.RaceAddParamIn">
+		insert into race_group values
+	
+		<if test="dod != null">
+		(null,#{raceId},#{tempDate},#{groupName},#{distince},#{wave},#{dod},
+			<if test="dod &lt; 2">
+				1,#{gender},#{raceNum},null,null,0,0,'',now(),null,null)
+			</if>
+			<if test="dod >= 2 and dod &lt; 4">
+				2,#{gender},#{raceNum},null,null,0,0,'',now(),null,null)
+			</if>
+			<if test="dod >= 4 and dod &lt; 6">
+				3,#{gender},#{raceNum},null,null,0,0,'',now(),null,null)
+			</if>
+			<if test="dod >= 6 and dod &lt; 8">
+				4,#{gender},#{raceNum},null,null,0,0,'',now(),null,null)
+			</if>
+			<if test="dod >=8">
+				5,#{gender},#{raceNum},null,null,0,0,'',now(),null,null)
+			</if>
+		</if>
+	</insert>
+	
+	<!-- 通过赛事id查询赛事详细信息 -->
+	<select id="findRaceDetailById" resultType="com.hworld.canoe.domain.req.vo.match.RaceDetailOutParam">
+		select DISTINCT
+			a.id,
+			a.`name`,
+			a.race_date,
+			a.area_id,
+			b.`name` as cityName,
+			a.address,
+			c.id as seasonId,
+			c.`name` as seasonName,
+			a.organiser
+		from race a
+			left join area b on a.area_id = b.id
+			left join race_season c on a.race_season_id = c.id
+		where a.deleted_flag = 0 and a.id = #{id}
+	</select>
+	
+	<!-- 修改赛事 -->
+	<update id="updateRace" parameterType="java.util.Map">
+		update race
+		   <set>
+			  <if test="map.name != null and map.name != ''">
+		          name = #{map.name},
+		      </if>
+		      <if test="map.raceDate != null and map.raceDate != ''">
+		          race_date = #{map.raceDate},
+		      </if>
+		      <if test="map.areaId != null and map.areaId != ''">
+		          area_id = #{map.areaId},
+		      </if>
+		      <if test="map.address != null and map.address != ''">
+		          address = #{map.address},
+		      </if>
+		      <if test="map.organiser != null and map.organiser != ''">
+		          organiser = #{map.organiser},
+		      </if>
+		      <if test="map.raceSeasonId != null and map.raceSeasonId != ''">
+		      	race_season_id = #{map.raceSeasonId}
+		      </if>
+		   </set>
+		where id = #{map.id}
+	</update>
+	
+	<!-- 根据赛事id得知此赛事是否已录入成绩 -->
+	<select id="findRaceIsCanDelete" resultType="java.lang.Integer">
+		select COUNT(*)
+		from race a,race_group b,race_competition c
+		where a.id = b.race_id and c.race_group_id = b.id 
+		and a.id = #{id}
+	</select>
+	
+	<!-- 删除赛事 -->
+	<delete id="deleteRace" parameterType="java.lang.Integer">
+		delete from race where id = #{id}
+	</delete>
+	
+	<!-- 成绩发布前确认成绩是否被清空 -->
+	<select id="sureScoreIsClear" resultType="java.lang.Integer">
+		select count(*)
+		from race_competition a,race b,race_group c
+		where a.deleted_flag != 1 and c.race_id = b.id and a.race_group_id = c.id and b.id = #{id}
+	</select>
+	
+	<!-- 成绩发布 -->
+	<update id="publishScore" parameterType="java.lang.Integer">
+		update race_group
+		<set>
+			<if test="raceId != null and raceId != ''">
+				publish_competition = 1
+			</if>
+		</set>
+		where race_id = #{raceId}
+	</update>
+
+</mapper>

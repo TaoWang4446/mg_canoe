@@ -1,0 +1,136 @@
+.header .content .footer{
+    min-width: 1000px;
+}
+.header{
+    width: 100%;
+    text-align: left;
+    height: 60px;
+    background: #bfa07c;
+}
+
+.logo{
+
+}
+
+.content{
+    background-image: url("../../img/login_bg.jpg");
+    background-repeat: no-repeat!important;
+    background-size: 100% 100%!important;
+    height: 90%
+}
+
+.content_page{
+    width: 50%;
+    height: 100%;
+    position: relative;
+    float: right;
+    overflow: hidden;
+}
+
+.login_page{
+    width: 60%;
+    height: 60%;
+    position: absolute;
+    left: 20%;
+    top: 10%;
+    min-height: 400px;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 5px;
+}
+
+.login_head{
+    height: 45px;
+    line-height: 45px;
+    background-color: #bfa07c;
+}
+.tab-content{
+    padding: 20px 10% 0 10% !important;
+}
+
+.input-icon{
+    margin-bottom: 25px;
+    position: relative;
+    left: 0;
+}
+
+.input-icon > i{
+    margin: 14px 4px 4px 14px;
+    font-size: 20px!important;
+    line-height: 20px!important;
+    color: #ccc;
+    display: block;
+    position:absolute;
+    width: 16px;
+    z-index: 3;
+    text-align: center;
+}
+
+.input-icon > .form-control{
+    padding-left: 50px;
+}
+.form-control{
+    display: block;
+    height: 50px;
+    border-radius: 10px;
+    padding: 6px 12px;
+    line-height: 50px;
+    font-size: 14px;
+    font-weight: normal;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    box-shadow:none;
+}
+
+.form-control:focus{
+    border-color: #999;
+    box-shadow: none;
+    outline: none;
+}
+
+.yzm_put{
+    width: 74%;
+}
+.yzm_yz{
+    width: 25%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #ccc;
+    line-height: 50px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.login_sub{
+    margin-top: 10px;
+}
+
+.login_sub input {
+    padding: 16px 0px;
+    background: #bfa07c;
+    color: #fff;
+}
+.login_sub .btn:hover {
+    color: #fff;
+    background: #caa645;
+}
+.login_sub .btn:focus{
+    outline: none;
+}
+
+.btn{
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.footer{
+    font-family: "微软雅黑";
+    font-size: 12px;
+    color: #fff;
+    padding: 13px 0 0 0;
+    text-align: center;
+    background-color: #bfa07c;
+    height: 40px;
+}

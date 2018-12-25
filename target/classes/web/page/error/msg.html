@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link th:href="@{/static/css/error.css}" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<div th:fragment="pageError" id="page-error">
+    <div class="page-error">
+        <div class="message-holder" role="alert" aria-role="alert">
+            <div th:each="list:${errorMsg}" class="error-list">
+                <i class="iconfont">&#xe6b6;</i>
+                <span th:utext="${list.survId}"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="pageOK" id="page-ok">
+    <div class="page-ok">
+        <div class="message-holder" role="alert" aria-role="alert">
+            <p>删除成功!</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

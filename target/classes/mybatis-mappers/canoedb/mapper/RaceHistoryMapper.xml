@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hworld.canoe.dao.wx.RaceHistoryMapper">
+
+	<!-- 查询当前登录者的参赛历史 -->
+	<select id="findRaceHistory" resultType="com.hworld.canoe.domain.req.vo.wx.racehistory.RaceHistoryOutParam">
+		select DISTINCT
+			a.id as raceId,
+			a.`name` as raceName,
+			d.`name` as areaName,
+			a.address,
+			a.race_date as raceDate,
+			b.group_name as groupName,
+			c.finsh_time as finishTime,
+			b.given_competition_point as competitionPoint,
+			b.given_finsh_point as finishPoint
+		from race a,race_group b,race_competition c,area d
+		where b.race_id = a.id and c.race_group_id = b.id and a.area_id = d.id
+		and c.player_id = #{id}
+	</select>
+	
+</mapper>

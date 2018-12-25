@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <!--<properties resource="dev.properties"/>-->
+
+    <context id="globaldb" targetRuntime="MyBatis3" >
+        <!--<property name="beginningDelimiter" value="`"/>-->
+        <!--<property name="endingDelimiter" value="`"/>-->
+        <property name="mergeable" value="false"></property>
+        <plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+            <property name="mappers" value="tk.mybatis.mapper.common.Mapper"/>
+            <property name="caseSensitive" value="false"/>
+        </plugin>
+        <commentGenerator>
+            <property name="suppressAllComments" value="false"/>
+            <property name="suppressDate" value="false"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="org.mariadb.jdbc.Driver"
+                        connectionURL="jdbc:mariadb://10.100.248.11:3307/crm_global_db?application_name=crm"
+                        userId="root"
+                        password="root">
+
+        </jdbcConnection>
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+        <javaModelGenerator targetPackage="${targetModelPackage}" targetProject="${targetJavaProject}">
+            <property name="enableSubPackages" value="false"/>
+            <property name="trimStrings" value="false"/>
+
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="${targetXMLPackage}" targetProject="${targetResourcesProject}">
+            <property name="enableSubPackages" value="false"/>
+
+        </sqlMapGenerator>
+
+        <javaClientGenerator targetPackage="${targetMapperPackage}" targetProject="${targetJavaProject}"
+                             type="XMLMAPPER">
+            <property name="enableSubPackages" value="false"/>
+
+        </javaClientGenerator>
+
+        <!--<table tableName="base_company" domainObjectName="Company" >
+        <generatedKey column="id" identity="false" sqlStatement="myql"/>
+        </table>
+        <table tableName="base_system" domainObjectName="System" >
+        <generatedKey column="id" identity="false" sqlStatement="myql"/>
+        </table>-->
+        <!--<table tableName="base_group" domainObjectName="Group" >
+            &lt;!&ndash;<generatedKey column="id" identity="true"/>&ndash;&gt;
+        </table>
+        <table tableName="base_group_type" domainObjectName="GroupType" >
+        </table>-->
+        <!--<table tableName="base_resource_authority" domainObjectName="ResourceAuthority" >
+        </table>-->
+        <!--<table tableName="base_element" domainObjectName="Element">-->
+        <!--</table>-->
+        <!--<table tableName="gate_client" domainObjectName="GateClient">-->
+        <!--</table>-->
+       <!-- <table tableName="auth_company_app_group_leader" domainObjectName="CompanyAppGroup">
+        </table>-->
+       <!-- <table tableName="client" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="company_connection"  enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="connection" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>-->
+
+      <!--  <table tableName="member_connection" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="member_connection" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>-->
+
+
+      <!--  <table tableName="member_tag_connection" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="member_tag_connection" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="member_care_connection" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="member_care_connection" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>-->
+
+        <table tableName="area" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="area" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+       <!-- <table tableName="area_weather" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="area_weather" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="centificate_province" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="centificate_province" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="channel" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="channel" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="city_mobile" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="city_mobile" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="company" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="company" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="company_connection" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="company_connection" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="connection" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="connection" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="connection_property" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="connection_property" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+
+        <table tableName="setting_group" enableCountByExample="true" enableDeleteByExample="true"
+               enableSelectByExample="true"
+               enableUpdateByExample="true">
+        </table>
+        <table tableName="setting_group" enableCountByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>-->
+        <!--<table tableName="auth_group" domainObjectName="AuthGroup" >
+        </table>-->
+       <!-- <table tableName="auth_group_app" domainObjectName="AuthGroupApp" >
+        </table>
+        <table tableName="auth_group_user" domainObjectName="AuthGroupUser" >
+        </table>-->
+    </context>
+</generatorConfiguration>

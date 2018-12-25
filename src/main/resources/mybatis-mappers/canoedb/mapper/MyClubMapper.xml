@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hworld.canoe.dao.wx.MyClubMapper">
+
+	<!-- 俱乐部head -->
+	<select id="findClubHead" resultType="com.hworld.canoe.domain.req.vo.wx.myclub.ClubHeadOutParam">
+		select DISTINCT
+			a.id as clubId,
+			a.club_name as clubName,
+			a.club_img as clubLogo,
+			b.`name` as clubArea
+		from club a,area b
+		where a.area_id = b.id and a.deleted_flag = 0 and a.id = #{clubId}
+	</select>
+
+	<!-- 查询俱乐部介绍 -->
+	<select id="findClubIntroduction" resultType="com.hworld.canoe.domain.req.vo.wx.myclub.ClubIntroductionOutParam">
+		select DISTINCT
+			a.introduction,
+			a.contact_name as contactName,
+			a.mobile,
+			a.mail
+		from club a
+		where a.deleted_flag = 0 and a.id = #{clubId}
+	</select>
+	
+	<!-- 查询俱乐部成员 -->
+	<select id="findClubMember" resultType="com.hworld.canoe.domain.req.vo.wx.myclub.ClubMemberOutParam">
+		select DISTINCT
+			d.rank,
+			c.`name` as memberName,
+			c.total_compete_point as CompetePoint,
+			c.total_finish_point as FinishPoint
+		from club a,area b,player c,race_competition d
+		where a.area_id = b.id and c.club_id = a.id and d.player_id = c.id
+		and a.deleted_flag = 0 and a.id = #{clubId}
+	</select>
+	
+	<!-- 查询赛事 -->
+	<select id="findClubRace" resultType="com.hworld.canoe.domain.req.vo.wx.myclub.ClubRaceOutParam">
+		select DISTINCT
+			b.race_date as raceDate,
+			b.address,
+			b.`name` as raceName,
+			d.`name` as areaName,
+			c.given_competition_point as competePoint,
+			c.given_finsh_point as finishPoint
+		from club a,race b,race_group c,area d
+		where b.area_id = d.id and c.race_id = b.id
+		and b.deleted_flag = 0 and a.id = #{clubId}
+	</select>
+	
+	<!-- 查询所有俱乐部 -->
+	<select id="findAllClub" resultType="com.hworld.canoe.domain.req.vo.wx.myclub.ClubOutParam">
+		select DISTINCT a.id,a.club_name as clubName
+        from club a
+        where a.`status` = 1 and a.deleted_flag = 0
+	</select>
+	
+	<!-- 申请转会 -->
+	<insert id="transferClub" parameterType="java.util.Map">
+		insert into play_transfer_application
+		values(null,#{map.playerId},#{map.fromClubId},#{map.targetClubId},1,0,'',DEFAULT,DEFAULT,DEFAULT)
+	</insert>
+	
+</mapper>

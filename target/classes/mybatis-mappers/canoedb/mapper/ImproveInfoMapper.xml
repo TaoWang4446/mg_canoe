@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hworld.canoe.dao.wx.ImproveInfoMapper">
+
+	<resultMap id="CountryResultMap" type="com.hworld.canoe.domain.req.entity.Area" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="en_name" property="enName" jdbcType="VARCHAR" />
+	    <result column="level_gap" property="levelGap" jdbcType="INTEGER" />
+	    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+	    <result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+	    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+	    <result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+	    <result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+	    <result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+  	</resultMap>
+
+	<!-- 查询国籍 -->
+	<select id="findCountry" resultMap="CountryResultMap">
+		select DISTINCT a.id,a.`name`
+		from area a
+		where a.deleted_flag = 0 and a.parent_id = 0
+	</select>
+
+	<!-- 查找所有省份 -->
+	<select id="findAllProvince" resultType="com.hworld.canoe.domain.req.vo.member.ProvinceOutParam">
+		select DISTINCT id as pid,`name` as pname
+		from area
+		where parent_id = 1 and deleted_flag = 0
+	</select>
+
+	<!-- 根据省份id查询城市信息 -->
+	<select id="findAllCityByPid" resultType="com.hworld.canoe.domain.req.vo.member.CityOutParam">
+		select DISTINCT id as cid,`name` as cname
+		from area
+		where parent_id = #{pid} and deleted_flag = 0
+	</select>
+	
+	<!-- 查询所有器材类型 -->
+	<select id="findAllEquipmentType" resultType="com.hworld.canoe.domain.req.vo.member.EquipmentTypeOutParam">
+		select DISTINCT a.id,a.`name`
+		from equipment_type a
+		where a.`status` = 1 and a.deleted_flag = 0
+	</select>
+
+	<!-- 根据器材类型id查询品牌信息 -->
+	<select id="findBrandInfoByTid" resultType="com.hworld.canoe.domain.req.vo.member.BrandOutParam">
+		select DISTINCT a.brand_name as brandName,a.id
+		from brand a,xsports_equipmentx b,equipment_type c
+		where b.brand_id = a.id and b.equipment_category_id = c.id and a.`status` = 1
+		and b.equipment_category_id = #{tid}
+	</select>
+	
+	<!-- 根据会员id查询信息 -->
+	<select id="findMemberInfoById" resultType="com.hworld.canoe.domain.req.vo.wx.improveInfo.ImproveInfoOutParam">
+		select DISTINCT
+			a.id as memberId,
+			a.`name` as memberName,
+			a.country as countryId,
+			a.id_no as idNo,
+			a.province as areaId,
+			b.`name` as areaName,
+			d.id as typeId,
+			c.id as brandId,
+			e.`name` as model
+		from player a,area b,brand c,equipment_type d,xsports_equipmentx e
+		where a.brand_id = c.id and c.area_id = b.id and e.equipment_category_id = d.id and e.brand_id = c.id 
+		and a.id = #{id}
+	</select>
+	
+	<!-- 完善信息 -->
+	<update id="improveInfo" parameterType="java.util.Map">
+		update player
+			<set>
+				<if test="map.name != null and map.name != ''">
+			        name = #{map.name},
+			    </if>
+			    <if test="map.country != null and map.country != ''">
+		            country = #{map.country},
+		        </if>
+			    <if test="map.idNo != null and map.idNo != ''">
+			        id_no = #{map.idNo},
+			    </if>
+			    <if test="map.province != null and map.province != ''">
+		        	province = #{map.province}
+		        </if>
+			</set>
+		where id = #{map.id};
+		
+		update player_prefer_equipment
+		<set>
+			<if test="map.equipmentTypeId != null and map.equipmentTypeId != ''">
+				equipment_type_id = #{map.equipmentTypeId},
+			</if>
+			<if test="map.equipmentBrandId != null and map.equipmentBrandId != ''">
+				equipment_brand_id = #{map.equipmentBrandId},
+			</if>
+			<if test="map.model != null and map.model != ''">
+				model = #{map.model}
+			</if>
+		</set>
+		where player_id = #{map.id}
+	</update>
+	
+	
+</mapper>

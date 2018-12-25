@@ -1,0 +1,131 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:permission="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>会员列表</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/frame.css">
+    <link rel="stylesheet" href="../../static/css/crm/crm.css">
+    <link rel="stylesheet" href="../../static/fonts/iconfont.css">
+    <link rel="stylesheet" href="../../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../static/css/dataTables.bootstrap.min.css">
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a>首页</a>
+        <a>会员</a>
+        <a>
+          <cite>会员信息</cite></a>
+      </span>
+</div>
+<div class="wrapper">
+    <div class="bg_box_1">
+        <div class="bg_box_2">
+            <div class="public_head padding_15">
+                <div class="public_head_top">
+                    <div class="public_head_title fl">
+                        <span>会员列表</span>
+                    </div>
+                    <div class="add_mem fr">
+                        <a href="/member/pageAdd" class="layui-btn layui-btn-radius martop_0 add_member">
+                            <i class="crmft">&#xe973;</i>
+                            新增会员
+                        </a>
+                    </div>
+                </div>
+                <div class="member_info_all">
+                    <div class="member_info_search layui-clear">
+                        <form action="" class="layui-form">
+                            <div class="keyword-input fl margin_right_20">
+                                <label class="layui-form-label w_85 text_left w_85">关键字</label>
+                                <input type="text" name="title" required lay-verify="required" placeholder="姓名/手机号/编号" autocomplete="off" class="layui-input" id="keyword">
+                            </div>
+                            <div class="w_10 fl margin_right_20">
+                                <label class="layui-form-label w_85 text_left w_85">注册时间</label>
+                                <input type="text" name="title" required lay-verify="required" placeholder="开始时间" autocomplete="off" class="layui-input" id="start_time">
+                            </div>
+                            <div class="w_10 fl margin_right_20">
+                                <label class="layui-form-label w_85 text_left w_85">结束时间</label>
+                                <input type="text" name="title" required lay-verify="required" placeholder="结束时间" autocomplete="off" class="layui-input" id="end_time">
+                            </div>
+                            <div class="w_10 fl margin_right_20">
+                                <label class="layui-form-label w_85 text_left w_85">性别</label>
+                                <select name="Sex" id="Sex">
+                                    <option value="">请选择</option>
+                                    <option value="M">男</option>
+                                    <option value="F">女</option>
+                                </select>
+                            </div>
+                            <div class="w_10 fl margin_right_20">
+                                <label class="layui-form-label text_left input_100 w_85">是否黑榜选手</label>
+                                <select name="yorn" id="yorn">
+                                    <option value="">全部</option>
+                                    <option value="1">是</option>
+                                    <option value="0">否</option>
+                                </select>
+                            </div>
+                            <div class="w_10 fl margin_right_20">
+                                <label class="layui-form-label text_left input_100 w_85">所属俱乐部</label>
+                                <select name="club" id="club">
+                                    <option value="">请选择</option>
+                                    <option th:each="k:${clubs}" th:value="${k.id}" th:text="${k.val}"></option>
+                                </select>
+                            </div>
+                            <div class="w_10 fl margin_right_20">
+                                <label class="layui-form-label w_85 text_left">状态</label>
+                                <select name="state" id="state">
+                                    <option value="">请选择</option>
+                                    <option value="E">活跃</option>
+                                    <option value="F">初始</option>
+                                    <option value="X">注销</option>
+                                </select>
+                            </div>
+                        </form>
+                        <div class="search_btn">
+                            <button class="layui-btn margin_0" id="search_btn">搜索</button>
+                        </div>
+                    </div>
+                    <div class="member_info_list">
+                        <table class="layui-table" id="main-table">
+                            <thead>
+                            <tr>
+                                <th>编号</th>
+                                <th>姓名</th>
+                                <th>手机号</th>
+                                <th>性别</th>
+                                <th>所属俱乐部</th>
+                                <th>累计竞争积分</th>
+                                <th>累计完赛积分</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody class="revise_info"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../static/js/jquery.js"  type="text/javascript"></script>
+<script src="../../static/js/plugins/layui/layui.js"  type="text/javascript"></script>
+<script src="../../static/js/frame.js"  type="text/javascript"></script>
+<script src="../../static/js/plugins/datatables/jquery.dataTables.min.js" type="text/javascript"></script>
+<script src="../../static/js/plugins/datatables/dataTables.bootstrap.min.js" type="text/javascript"></script>
+<script src="../../static/js/page/memberList.js"></script>
+<script>
+    jQuery(document).ready(function () {
+        searchMember();
+    })
+</script>
+</html>

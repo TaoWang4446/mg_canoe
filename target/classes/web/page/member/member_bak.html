@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+    <link rel="stylesheet" href="../../fonts/ali/iconfont.css">
+    <link rel="stylesheet" href="../../static/js/plugins/layui/css/layui.css">
+    <title>会员模块首页</title>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="layui-layout layui-layout-admin">
+            <div class="layui-header">
+                <div class="layui-logo">LOGO</div>
+                <!--<ul class="layui-nav layui-layout-left">
+                    <li class="layui-nav-item"><a href="">控制台</a></li>
+                    <li class="layui-nav-item"><a href="">商品管理</a></li>
+                    <li class="layui-nav-item"><a href="">用户</a></li>
+                    <span class="layui-nav-bar" style="left: 132px; top: 55px; width: 0px; opacity: 0;"></span></ul>-->
+                <div class="body-layui-breadcrumb layui-layout-left">
+                    <span class="layui-breadcrumb">
+                        <a href="#">首页</a>
+                        <a href="#">会员</a>
+                        <a href="#">会员信息</a>
+                    </span>
+                </div>
+                <ul class="layui-nav layui-layout-right">
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">
+                            <img src="../../static/img/gushifu.jpg" class="layui-nav-img">
+                            用户名
+                            <span class="layui-nav-more"></span>
+                        </a>
+                        <dl class="layui-nav-child layui-anim layui-anim-upbit">
+                            <dd><a href="">基本资料</a></dd>
+                            <dd><a href="">安全设置</a></dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item"><a href="">退出</a></li>
+                    <span class="layui-nav-bar" style="left: 187.891px; top: 55px; width: 0px; opacity: 0;"></span></ul>
+            </div>
+            <div class="layui-side layui-bg-black">
+                <div class="layui-side-scroll">
+                    <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                        <li class="layui-nav-item">
+                            <a class="" href="javascript:;">侧导航1<span class="layui-nav-more"></span></a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="javascript:;">列表一</a></dd>
+                                <dd><a href="javascript:;">列表二</a></dd>
+                                <dd><a href="javascript:;">列表三</a></dd>
+                                <dd><a href="">超链接</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item">
+                            <a href="javascript:;">侧导航2<span class="layui-nav-more"></span></a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="javascript:;">列表一</a></dd>
+                                <dd><a href="javascript:;">列表二</a></dd>
+                                <dd><a href="">超链接</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item">
+                            <a href="">侧导航3 <span class="layui-nav-more"></span></a>
+                        </li>
+                        <li class="layui-nav-item layui-nav-itemed">
+                            <a class="" href="javascript:;">会员<span class="layui-nav-more"></span></a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="javascript:;">会员信息</a></dd>
+                                <dd><a href="javascript:;">会员详情</a></dd>
+                                <dd><a href="javascript:;">会员导出</a></dd>
+                                <dd><a href="">会员管理</a></dd>
+                            </dl>
+                        </li>
+                        <span class="layui-nav-bar" style="top: 22.5px; height: 0px; opacity: 0;"></span></ul>
+                </div>
+            </div>
+            <div class="layui-body">
+                <div class="bg_box">
+                    <div class="bg_box_2">
+                        <div class="member_info padding_15">
+                            <div class="member_info_top">
+                                <div class="member_info_title fl">
+                                    <span>会员列表</span>
+                                </div>
+                                <div class="member_info_btn fr">
+                                    <button class="layui-btn layui-btn-radius">
+                                        <i class="crmft">&#xe973;</i>
+                                        新增会员
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="member_info_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-footer layui-bg-black">
+                <div class="fr">
+                    Copyright ? 2018. 技术支持:盟广信息
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../static/js/jquery.js"></script>
+<script src="../../static/js/plugins/layui/layui.js"></script>
+<script>
+    jQuery(document).ready(function () {
+        layui.use('element', function(){
+            var element = layui.element;
+        });
+    })
+</script>

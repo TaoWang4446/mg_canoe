@@ -1,0 +1,265 @@
+ul,li,a,div,button{
+    margin: 0;
+    padding: 0;
+}
+.fl{
+    float: left;
+}
+.fr{
+    float: right;
+}
+.body-layui-breadcrumb{
+    padding-left: 50px;
+}
+.body-layui-breadcrumb .layui-breadcrumb a{
+    display: block;
+    height: 60px;
+    line-height: 60px;
+    float: left;
+}
+/*.bg_box_1{
+    padding: 10px 20px;
+    background-color: #EAEDF1;
+}*/
+.bg_box_2{
+    background-color: #fff;
+}
+.public_head_top{
+    height: 50px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+.public_head_title{
+    line-height: 50px;
+    font-size: 16px;
+    font-family: "微软雅黑";
+    font-weight: 700;
+    color: #34495E;
+}
+.padding_15{
+    padding: 15px;
+}
+.martop_0{
+    margin-top: 0;
+    font-weight: 700;
+}
+.w_10{
+    width: 10%;
+}
+.w_20{
+    width: 20%;
+}
+.w_85{
+    width: 85%;
+}
+.text_left{
+    text-align: left;
+}
+.margin_right_20{
+    margin-right: 20px;
+}
+.search_btn{
+    padding-top: 43px;
+    float: left;
+}
+.margin_0{
+    margin-top: 0;
+    border-radius: 10px;
+}
+
+.margin_right_20 .layui-form-select .layui-edge{
+    top: 75%;
+}
+.member_info_search , .match_search{
+    padding: 10px 0;
+    margin-bottom: 25px;
+}
+.layui-table thead tr{
+    background-color: skyblue;
+}
+.add_member_info,.add_match_info,.add_group_set,.addClub-form{
+    padding-top: 30px;
+}
+.layui-form-item .input_width{
+    width: 217px;
+}
+.layui-form-item .input_width_2{
+    width: 130px;
+}
+.layui-form-item .margin0{
+    margin: 0;
+}
+.layui-form-item .margin_r_10{
+    margin-right: 10px;
+}
+.layui-form-item .margin_r_20{
+    margin-right: 20px;
+}
+.add_member_info_btn,.add_match_btn,.center>th,.center>td{
+    text-align: center!important;
+}
+.add_member_info_btn .layui-btn-group .radius_15,
+.add_match_btn .layui-btn-group .radius_15
+{
+    border-radius: 15px;
+    margin-top: 0;
+}
+/*.add_btn,.back_btn{
+    margin: 30px;
+    float: left;
+}*/
+.basic_member_search,.match_search{
+    width: 100%;
+}
+
+.layui-form-item .layui-input-inline .src_btn{
+    margin-left:20px;
+    float: right;
+}
+.basic_member_search_list table th,
+.basic_member_search_list table td{
+    text-align: center!important;
+}
+.importMember{
+    line-height: 50px;
+    font-size: 15px;
+    margin-left: 15px;
+    padding: 3px 15px 0 15px;
+    border-bottom: 0;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-top: 2px solid #1E9FFF;
+    color: #1E9FFF;
+}
+.importMember_btn{
+    position: relative;
+}
+.importMember_btn button{
+    position: absolute;
+    left: 15px;
+}
+.table_bottom{
+    margin-bottom: 15px;
+}
+.txt_right{
+    text-align: right;
+}
+.margin_top_0{
+    margin-top: 0!important;
+}
+
+.posi{
+    position: relative;
+}
+
+.add_group_btn{
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    line-height: 50px;
+    color: #fff;
+    width: 50px;
+    height: 50px;
+    background-color: #1c6fb3;
+    text-align: center;
+    border-radius: 50%;
+
+}
+.add_group_btn:hover,
+.del_group_btn:hover{
+    cursor: pointer;
+}
+
+.input_100{
+    width: 100%;
+    padding: 9px 10px;
+}
+.ml_15{
+    margin-left: 15px;
+}
+.form{
+    position: relative;
+}
+.form .del_group_btn{
+    position: absolute;
+    top: 0;
+    right: 0;
+    line-height: 20px;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    background-color: #1c6fb3;
+    text-align: center;
+    border-radius: 50%;
+}
+.age-info-list,
+.equ-info-list
+{
+    padding-top: 50px;
+    padding-left: 40px;
+}
+.text-width{
+    width: 388px;
+}
+.layui-form-item .w_390{
+    width: 388px;
+}
+.layui-form-item .costom-input{
+    width: 277px;
+}
+.costom-container{
+    position: relative;
+    margin: 0 auto;
+    width: 750px;
+}
+.revise_info>tr>td:nth-child(2):hover{
+    cursor: pointer;
+}
+.member_detail_list .match-point{
+    margin: 10px;
+    color: red;
+}
+
+.form{
+    margin-top: 20px;
+    border-bottom: 1px solid #cccccc;
+}
+.add_member_info_btn{
+    margin-top: 20px;
+}
+#main-table{
+    width: 100%!important;
+}
+
+@media screen and ( max-width: 1080px) {
+    .input_w_160{
+        width: 160px!important;
+    }
+    .input_width_96{
+        width: 96px!important;
+    }
+    .search_btn{
+        padding-top: 25px;
+    }
+    .w_85{
+        padding: 0;
+    }
+}
+
+@media screen and ( max-width: 1366px) {
+    .layui-form-item .input_width {
+        width: 167px;
+    }
+    .layui-form-item .input_width_2 {
+        width: 96px;
+    }
+    .layui-btn{
+        padding: 0 10px;
+    }
+    .layui-table th{
+        padding: 9px 9px;
+    }
+    .keyword-input{
+        width: 160px;
+    }
+}

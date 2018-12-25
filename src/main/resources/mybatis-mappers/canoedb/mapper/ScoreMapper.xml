@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hworld.canoe.dao.ScoreMapper">
+
+	<resultMap id="BaseResultMap" type="com.hworld.canoe.domain.req.entity.RaceCompetition" >
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="race_group_id" property="raceGroupId" jdbcType="INTEGER" />
+		<result column="player_id" property="playerId" jdbcType="INTEGER" />
+		<result column="finsh_time" property="finshTime" jdbcType="VARCHAR" />
+		<result column="equipment_name" property="equipmentName" jdbcType="VARCHAR" />
+		<result column="playerName" property="playerName" jdbcType="VARCHAR" />
+		<result column="club_name" property="clubName" jdbcType="VARCHAR" />
+		<result column="group_name" property="groupName" jdbcType="VARCHAR" />
+		<result column="total_compete_point" property="totalCompetePoint" jdbcType="DECIMAL" />
+		<result column="total_finish_point" property="totalFinishPoint" jdbcType="DECIMAL" />
+		<result column="typeName" property="typeName" jdbcType="VARCHAR" />
+		<result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+		<result column="equipment_category_id" property="equipmentCategoryId" jdbcType="INTEGER" />
+		<result column="race_player_no" property="racePlayerNo" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="rank" property="rank" jdbcType="INTEGER" />
+		<result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+		<result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+		<result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+		<result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+		<result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<!-- 成绩列表(多条件分页) -->
+	<select id="findAllScore" resultMap="BaseResultMap">
+		select DISTINCT
+		a.id,
+		b.`name` as playerName,
+		c.club_name,
+		d.group_name,
+		a.finsh_time,
+		a.rank,
+		d.given_competition_point as total_compete_point,
+		d.given_finsh_point as total_finish_point,
+		e.`name` as typeName,
+		f.brand_name,
+		a.equipment_name
+		from race_competition a
+		left join player b ON a.player_id = b.id
+		left join club c ON b.club_id = c.id
+		left join race_group d ON a.race_group_id = d.id
+		left join equipment_type e ON a.equipment_category_id = e.id
+		left join brand f ON f.id = b.brand_id
+		<where>
+			<if test="map.keyword != null and map.keyword != ''">
+				and b.`name` like '%${map.keyword}%' or b.mobile like '%${map.keyword}%' or b.id = #{map.keyword}
+			</if>
+			<if test="map.clubId != null and map.clubId != ''">
+				and b.club_id = #{map.clubId}
+			</if>
+			<if test="map.raceGroupId != null and map.raceGroupId != ''">
+				and a.race_group_id = #{map.raceGroupId}
+			</if>
+			and a.deleted_flag = 0
+		</where>
+	</select>
+
+	<!-- 查询所有俱乐部名称 -->
+	<select id="findAllClubByOption" resultType="com.hworld.canoe.domain.req.vo.member.ZzsOutParam">
+		select DISTINCT a.id as id,a.club_name as name
+		from club a
+		where a.`status` = 1 and a.deleted_flag = 0
+	</select>
+
+	<!-- 查询所有大组名称 -->
+	<select id="findAllGroup" resultType="com.hworld.canoe.domain.req.vo.score.GroupNameOutParam">
+		select DISTINCT a.id,a.group_name as groupName
+		from race_group a
+		where a.deleted_flag = 0
+	</select>
+
+	<!-- 查询所有器材类型 -->
+	<select id="findAllEquipmentType" resultType="com.hworld.canoe.domain.req.vo.member.EquipmentTypeOutParam">
+		select DISTINCT a.id,a.`name`
+		from equipment_type a
+		where a.`status` = 1 and a.deleted_flag = 0
+	</select>
+
+	<!-- 根据成绩id查询成绩 -->
+	<select id="findById" resultType="com.hworld.canoe.domain.req.vo.score.ScoreUpdateOutParam">
+		select DISTINCT
+			c.id as scoreId,
+			a.id as memberId,
+			a.`name` as memberName,
+			a.mobile,
+			CASE WHEN a.is_seed = 0 THEN '否'
+				 WHEN a.is_seed = 1 THEN '是'
+		    END as isSeed,
+			a.club_id as clubId,
+			b.club_name as clubName,
+			d.id as raceGroupId,
+			d.group_name as groupName,
+			c.finsh_time as finishTime,
+			g.id as typeId,
+			g.`name` as typeName,
+			e.id as brandId,
+			e.brand_name as brandName,
+			f.id as modelId,
+			f.`name` as modelName,
+			c.id as competitionId
+		from player a,club b,race_competition c,race_group d,brand e,xsports_equipmentx f,equipment_type g
+		where a.club_id = b.id and c.player_id = a.id and c.race_group_id = d.id and a.brand_id = e.id 
+			  and g.id = f.equipment_category_id and f.brand_id = e.id
+		and c.deleted_flag = 0 and c.id = #{id}
+	</select>
+
+	<!-- 修改成绩 -->
+	<update id="updateScore" parameterType="java.util.Map">
+		update player
+		<set>
+			<if test="map.name != null and map.name != ''">
+				`name` = #{map.name},
+			</if>
+			<if test="map.mobile != null and map.mobile != ''">
+				mobile = #{map.mobile},
+			</if>
+			<if test="map.isSeed != null and map.isSeed != ''">
+				is_seed = #{map.isSeed},
+			</if>
+			<if test="map.clubId != null and map.clubId != ''">
+				club_id = #{map.clubId}
+			</if>
+		</set>
+		where id = #{map.playerId};
+
+		update race_competition
+		<set>
+			<if test="map.raceGroupId != null and map.raceGroupId != ''">
+				race_group_id = #{map.raceGroupId},
+			</if>
+			<if test="map.finshTime != null and map.finshTime != ''">
+				finsh_time = #{map.finshTime}
+			</if>
+		</set>
+		where id = #{map.id};
+
+		update race_competition
+		<set>
+			<if test="map.equipmentCategoryId != null and map.equipmentCategoryId != ''">
+				equipment_category_id = #{map.equipmentCategoryId},
+			</if>
+			<if test="map.equipmentName != null and map.equipmentName != ''">
+				equipment_name = #{map.equipmentName},
+			</if>
+			<if test="map.brand != null and map.brand != ''">
+				brand = #{map.brand}
+			</if>
+		</set>
+		where id = #{map.id}
+	</update>
+
+	<!-- 删除成绩 -->
+	<delete id="deleteScore" parameterType="java.lang.Integer">
+		delete from race_competition where id = #{id}
+	</delete>
+
+	<!-- 导入成绩 -->
+	<insert id="addScore" parameterType="com.hworld.canoe.domain.req.po.score.Score">
+		insert into race_competition 
+		VALUES(null,#{score.groupId},#{score.playerId},#{score.finishTime},#{score.equipmentName},#{score.equipmentCategoryId},#{score.brand},
+		null,2,DEFAULT,0,'',DEFAULT,null,null)
+	</insert>
+
+
+
+	<!-- 清空成绩 -->
+	<update id="clearAllScore">
+		update race_competition
+		set deleted_flag = 1
+	</update>
+
+	<!-- 根据组名称得到组id -->
+	<select id="findGroupIdByName" resultType="java.lang.Integer">
+		select DISTINCT a.id
+		from race_group a
+		where a.deleted_flag = 0 and a.group_name = #{groupName}
+	</select>
+
+	<!-- 根据手机号得到会员id -->
+	<select id="findPlayerByPhone" resultType="java.lang.Integer">
+		select DISTINCT a.id
+		from player a
+		where a.deleted_flag = 0 and a.mobile = #{mobile}
+	</select>
+
+	<!-- 根据器材类型名称得到器材类型id -->
+	<select id="findEquipmentTypeIdByName" resultType="java.lang.Integer">
+		select DISTINCT a.id
+		from equipment_type a
+		where a.deleted_flag = 0 and a.`name` = #{equipmentTypeName}
+	</select>
+
+	<!-- 积分计算前判断成绩是否被清空 -->
+	<select id="sureScoreIsClear" resultType="java.lang.Integer">
+		select count(*)
+		from race_competition a
+		where a.deleted_flag != 1
+	</select>
+
+	<!-- 积分计算 -->
+	<select id="findAllPoint" resultType="com.hworld.canoe.domain.req.vo.score.ScoreOutParam">
+		select DISTINCT
+		e.id as pointId,
+		a.id as playerId,
+		a.`name` as playerName,
+		a.wechat_openid as wechatOpenId,
+		b.club_name as clubName,
+		c.group_name as groupName,
+		d.finsh_time as finishTime,
+		d.rank,
+		d.rank as totalRank,
+		e.competition_point as competitionPoint,
+		e.finish_point as finishPoint,
+		f.`name` as typeName,
+		g.brand_name as brandName,
+		h.model
+		from player a,club b,race_group c,race_competition d,player_point e,equipment_type f,brand g,player_prefer_equipment h
+		where a.club_id = b.id and e.race_group_id = c.id and e.race_competition_id = d.id and e.player_id = a.id
+		and h.player_id = a.id and h.equipment_type_id = f.id and h.equipment_brand_id = g.id
+
+		<if test="map.keyword != null and map.keyword != ''">
+			and a.`name` like '%${map.keyword}%' or a.mobile like '%${map.keyword}%' or a.id = #{map.keyword}
+		</if>
+		<if test="map.clubId != null and map.clubId != ''">
+			and a.club_id = #{map.clubId}
+		</if>
+		<if test="map.raceGroupId != null and map.raceGroupId != ''">
+			and d.race_group_id = #{map.raceGroupId}
+		</if>
+		and a.deleted_flag = 0
+	</select>
+
+	<!-- 删除积分 -->
+	<delete id="deletePoint" parameterType="java.lang.Integer">
+		delete from player_point where id = #{pointId}
+	</delete>
+
+
+	<sql id="Example_Where_Clause" >
+		<where >
+			<foreach collection="oredCriteria" item="criteria" separator="or" >
+				<if test="criteria.valid" >
+					<trim prefix="(" suffix=")" prefixOverrides="and" >
+						<foreach collection="criteria.criteria" item="criterion" >
+							<choose >
+								<when test="criterion.noValue" >
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue" >
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue" >
+									and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue" >
+									and ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	<sql id="Update_By_Example_Where_Clause" >
+		<where >
+			<foreach collection="example.oredCriteria" item="criteria" separator="or" >
+				<if test="criteria.valid" >
+					<trim prefix="(" suffix=")" prefixOverrides="and" >
+						<foreach collection="criteria.criteria" item="criterion" >
+							<choose >
+								<when test="criterion.noValue" >
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue" >
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue" >
+									and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue" >
+									and ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	<sql id="Base_Column_List" >
+    id, race_group_id, player_id, finsh_time, equipment_name, equipment_category_id,
+    brand, race_player_no, status, rank, deleted_flag, created_by, created_on, modified_by,
+    modified_on
+  </sql>
+	<select id="selectByExample" resultMap="BaseResultMap" parameterType="com.hworld.canoe.domain.req.pojo.RaceCompetitionExample" >
+		select
+		<if test="distinct" >
+			distinct
+		</if>
+		<include refid="Base_Column_List" />
+		from race_competition
+		<if test="_parameter != null" >
+			<include refid="Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null" >
+			order by ${orderByClause}
+		</if>
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+		select
+		<include refid="Base_Column_List" />
+		from race_competition
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from race_competition
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+	<delete id="deleteByExample" parameterType="com.hworld.canoe.domain.req.pojo.RaceCompetitionExample" >
+		delete from race_competition
+		<if test="_parameter != null" >
+			<include refid="Example_Where_Clause" />
+		</if>
+	</delete>
+	<insert id="insert" parameterType="com.hworld.canoe.domain.req.pojo.RaceCompetition" >
+    insert into race_competition (id, race_group_id, player_id,
+      finsh_time, equipment_name, equipment_category_id,
+      brand, race_player_no, status,
+      rank, deleted_flag, created_by,
+      created_on, modified_by, modified_on
+      )
+    values (#{id,jdbcType=INTEGER}, #{raceGroupId,jdbcType=INTEGER}, #{playerId,jdbcType=INTEGER},
+      #{finshTime,jdbcType=TIME}, #{equipmentName,jdbcType=VARCHAR}, #{equipmentCategoryId,jdbcType=INTEGER},
+      #{brand,jdbcType=VARCHAR}, #{racePlayerNo,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER},
+      #{rank,jdbcType=INTEGER}, #{deletedFlag,jdbcType=BIGINT}, #{createdBy,jdbcType=VARCHAR},
+      #{createdOn,jdbcType=TIMESTAMP}, #{modifiedBy,jdbcType=VARCHAR}, #{modifiedOn,jdbcType=TIMESTAMP}
+      )
+  </insert>
+	<insert id="insertSelective" parameterType="com.hworld.canoe.domain.req.pojo.RaceCompetition" >
+		insert into race_competition
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="id != null" >
+				id,
+			</if>
+			<if test="raceGroupId != null" >
+				race_group_id,
+			</if>
+			<if test="playerId != null" >
+				player_id,
+			</if>
+			<if test="finshTime != null" >
+				finsh_time,
+			</if>
+			<if test="equipmentName != null" >
+				equipment_name,
+			</if>
+			<if test="equipmentCategoryId != null" >
+				equipment_category_id,
+			</if>
+			<if test="brand != null" >
+				brand,
+			</if>
+			<if test="racePlayerNo != null" >
+				race_player_no,
+			</if>
+			<if test="status != null" >
+				status,
+			</if>
+			<if test="rank != null" >
+				rank,
+			</if>
+			<if test="deletedFlag != null" >
+				deleted_flag,
+			</if>
+			<if test="createdBy != null" >
+				created_by,
+			</if>
+			<if test="createdOn != null" >
+				created_on,
+			</if>
+			<if test="modifiedBy != null" >
+				modified_by,
+			</if>
+			<if test="modifiedOn != null" >
+				modified_on,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="id != null" >
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="raceGroupId != null" >
+				#{raceGroupId,jdbcType=INTEGER},
+			</if>
+			<if test="playerId != null" >
+				#{playerId,jdbcType=INTEGER},
+			</if>
+			<if test="finshTime != null" >
+				#{finshTime,jdbcType=TIME},
+			</if>
+			<if test="equipmentName != null" >
+				#{equipmentName,jdbcType=VARCHAR},
+			</if>
+			<if test="equipmentCategoryId != null" >
+				#{equipmentCategoryId,jdbcType=INTEGER},
+			</if>
+			<if test="brand != null" >
+				#{brand,jdbcType=VARCHAR},
+			</if>
+			<if test="racePlayerNo != null" >
+				#{racePlayerNo,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null" >
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="rank != null" >
+				#{rank,jdbcType=INTEGER},
+			</if>
+			<if test="deletedFlag != null" >
+				#{deletedFlag,jdbcType=BIGINT},
+			</if>
+			<if test="createdBy != null" >
+				#{createdBy,jdbcType=VARCHAR},
+			</if>
+			<if test="createdOn != null" >
+				#{createdOn,jdbcType=TIMESTAMP},
+			</if>
+			<if test="modifiedBy != null" >
+				#{modifiedBy,jdbcType=VARCHAR},
+			</if>
+			<if test="modifiedOn != null" >
+				#{modifiedOn,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<select id="countByExample" parameterType="com.hworld.canoe.domain.req.pojo.RaceCompetitionExample" resultType="java.lang.Integer" >
+		select count(*) from race_competition
+		<if test="_parameter != null" >
+			<include refid="Example_Where_Clause" />
+		</if>
+	</select>
+	<update id="updateByExampleSelective" parameterType="map" >
+		update race_competition
+		<set >
+			<if test="record.id != null" >
+				id = #{record.id,jdbcType=INTEGER},
+			</if>
+			<if test="record.raceGroupId != null" >
+				race_group_id = #{record.raceGroupId,jdbcType=INTEGER},
+			</if>
+			<if test="record.playerId != null" >
+				player_id = #{record.playerId,jdbcType=INTEGER},
+			</if>
+			<if test="record.finshTime != null" >
+				finsh_time = #{record.finshTime,jdbcType=TIME},
+			</if>
+			<if test="record.equipmentName != null" >
+				equipment_name = #{record.equipmentName,jdbcType=VARCHAR},
+			</if>
+			<if test="record.equipmentCategoryId != null" >
+				equipment_category_id = #{record.equipmentCategoryId,jdbcType=INTEGER},
+			</if>
+			<if test="record.brand != null" >
+				brand = #{record.brand,jdbcType=VARCHAR},
+			</if>
+			<if test="record.racePlayerNo != null" >
+				race_player_no = #{record.racePlayerNo,jdbcType=VARCHAR},
+			</if>
+			<if test="record.status != null" >
+				status = #{record.status,jdbcType=INTEGER},
+			</if>
+			<if test="record.rank != null" >
+				rank = #{record.rank,jdbcType=INTEGER},
+			</if>
+			<if test="record.deletedFlag != null" >
+				deleted_flag = #{record.deletedFlag,jdbcType=BIGINT},
+			</if>
+			<if test="record.createdBy != null" >
+				created_by = #{record.createdBy,jdbcType=VARCHAR},
+			</if>
+			<if test="record.createdOn != null" >
+				created_on = #{record.createdOn,jdbcType=TIMESTAMP},
+			</if>
+			<if test="record.modifiedBy != null" >
+				modified_by = #{record.modifiedBy,jdbcType=VARCHAR},
+			</if>
+			<if test="record.modifiedOn != null" >
+				modified_on = #{record.modifiedOn,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		<if test="_parameter != null" >
+			<include refid="Update_By_Example_Where_Clause" />
+		</if>
+	</update>
+	<update id="updateByExample" parameterType="map" >
+		update race_competition
+		set id = #{record.id,jdbcType=INTEGER},
+		race_group_id = #{record.raceGroupId,jdbcType=INTEGER},
+		player_id = #{record.playerId,jdbcType=INTEGER},
+		finsh_time = #{record.finshTime,jdbcType=TIME},
+		equipment_name = #{record.equipmentName,jdbcType=VARCHAR},
+		equipment_category_id = #{record.equipmentCategoryId,jdbcType=INTEGER},
+		brand = #{record.brand,jdbcType=VARCHAR},
+		race_player_no = #{record.racePlayerNo,jdbcType=VARCHAR},
+		status = #{record.status,jdbcType=INTEGER},
+		rank = #{record.rank,jdbcType=INTEGER},
+		deleted_flag = #{record.deletedFlag,jdbcType=BIGINT},
+		created_by = #{record.createdBy,jdbcType=VARCHAR},
+		created_on = #{record.createdOn,jdbcType=TIMESTAMP},
+		modified_by = #{record.modifiedBy,jdbcType=VARCHAR},
+		modified_on = #{record.modifiedOn,jdbcType=TIMESTAMP}
+		<if test="_parameter != null" >
+			<include refid="Update_By_Example_Where_Clause" />
+		</if>
+	</update>
+	<update id="updateByPrimaryKeySelective" parameterType="com.hworld.canoe.domain.req.pojo.RaceCompetition" >
+		update race_competition
+		<set >
+			<if test="raceGroupId != null" >
+				race_group_id = #{raceGroupId,jdbcType=INTEGER},
+			</if>
+			<if test="playerId != null" >
+				player_id = #{playerId,jdbcType=INTEGER},
+			</if>
+			<if test="finshTime != null" >
+				finsh_time = #{finshTime,jdbcType=TIME},
+			</if>
+			<if test="equipmentName != null" >
+				equipment_name = #{equipmentName,jdbcType=VARCHAR},
+			</if>
+			<if test="equipmentCategoryId != null" >
+				equipment_category_id = #{equipmentCategoryId,jdbcType=INTEGER},
+			</if>
+			<if test="brand != null" >
+				brand = #{brand,jdbcType=VARCHAR},
+			</if>
+			<if test="racePlayerNo != null" >
+				race_player_no = #{racePlayerNo,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null" >
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="rank != null" >
+				rank = #{rank,jdbcType=INTEGER},
+			</if>
+			<if test="deletedFlag != null" >
+				deleted_flag = #{deletedFlag,jdbcType=BIGINT},
+			</if>
+			<if test="createdBy != null" >
+				created_by = #{createdBy,jdbcType=VARCHAR},
+			</if>
+			<if test="createdOn != null" >
+				created_on = #{createdOn,jdbcType=TIMESTAMP},
+			</if>
+			<if test="modifiedBy != null" >
+				modified_by = #{modifiedBy,jdbcType=VARCHAR},
+			</if>
+			<if test="modifiedOn != null" >
+				modified_on = #{modifiedOn,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.hworld.canoe.domain.req.pojo.RaceCompetition" >
+    update race_competition
+    set race_group_id = #{raceGroupId,jdbcType=INTEGER},
+      player_id = #{playerId,jdbcType=INTEGER},
+      finsh_time = #{finshTime,jdbcType=TIME},
+      equipment_name = #{equipmentName,jdbcType=VARCHAR},
+      equipment_category_id = #{equipmentCategoryId,jdbcType=INTEGER},
+      brand = #{brand,jdbcType=VARCHAR},
+      race_player_no = #{racePlayerNo,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      rank = #{rank,jdbcType=INTEGER},
+      deleted_flag = #{deletedFlag,jdbcType=BIGINT},
+      created_by = #{createdBy,jdbcType=VARCHAR},
+      created_on = #{createdOn,jdbcType=TIMESTAMP},
+      modified_by = #{modifiedBy,jdbcType=VARCHAR},
+      modified_on = #{modifiedOn,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

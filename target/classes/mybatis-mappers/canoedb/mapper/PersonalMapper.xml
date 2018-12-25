@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hworld.canoe.dao.wx.PersonalMapper">
+
+	<!-- 个人中心首页 -->
+	<select id="findPersonalIndex" resultType="com.hworld.canoe.domain.req.vo.wx.personal.PersonalOutParam">
+	
+	
+	
+	
+	</select>
+  
+</mapper>

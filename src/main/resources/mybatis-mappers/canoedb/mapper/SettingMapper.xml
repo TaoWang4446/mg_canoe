@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hworld.canoe.dao.SettingMapper">
+
+	<resultMap id="BaseResultMap" type="com.hworld.canoe.domain.req.entity.Club" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="club_name" property="clubName" jdbcType="VARCHAR" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="introduction" property="introduction" jdbcType="VARCHAR" />
+	    <result column="club_img" property="clubImg" jdbcType="VARCHAR" />
+	    <result column="status" property="status" jdbcType="VARCHAR" />
+	    <result column="area_id" property="areaId" jdbcType="INTEGER" />
+	    <result column="contact_name" property="contactName" jdbcType="VARCHAR" />
+	    <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+	    <result column="mail" property="mail" jdbcType="VARCHAR" />
+	    <result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+	    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+	    <result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+	    <result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+	    <result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<!-- 查询俱乐部(多条件) -->
+	<select id="findAllClubByCondition" resultMap="BaseResultMap">
+		select DISTINCT
+			a.id,
+			a.club_name,
+			a.area_id,
+			b.`name`,
+			a.contact_name,
+			a.mobile,
+			a.mail,
+			CASE WHEN a.`status` = 1 THEN '可用'
+				 WHEN a.`status` = 0 THEN '不可用'
+			END as `status`,
+			a.modified_by,
+			a.modified_on
+		from club a left join area b on a.area_id = b.id
+		<where>
+			<if test="map.keyword != null and map.keyword != ''">
+				and a.club_name like '%${map.keyword}%' or a.contact_name like '%${map.keyword}%' or a.mobile like '%${map.keyword}%'
+			</if>
+			and a.deleted_flag = 0 and b.deleted_flag = 0 
+		</where>
+	</select>
+	
+	<!-- 查询所有省份 -->
+	<select id="findAllProvince" resultType="com.hworld.canoe.domain.req.vo.member.ProvinceOutParam">
+		select DISTINCT id as pid,`name` as pname
+		from area
+		where parent_id = 1 and deleted_flag = 0
+	</select>
+
+	<!-- 根据省份id查询城市信息 -->
+	<select id="findAllCityByPid" resultType="com.hworld.canoe.domain.req.vo.member.CityOutParam">
+		select DISTINCT id as cid,`name` as cname
+		from area
+		where parent_id = #{pid} and deleted_flag = 0
+	</select>
+	
+	<!-- 新增俱乐部 -->
+	<insert id="addClud" parameterType="java.util.Map">
+		insert into club
+		values(null,#{map.name},#{map.introduction},#{map.logo},#{map.status},#{map.areaId},#{map.contactName},#{map.mobile},#{map.mail},0,'',NOW(),null,null)
+	</insert>
+	
+	<!-- 根据俱乐部id查询详情 -->
+	<select id="findClubById" resultType="com.hworld.canoe.domain.req.vo.setting.ClubDetailOutParam">
+		select DISTINCT 
+			a.id,
+			a.club_name,
+			a.contact_name,
+			a.mobile,
+			a.mail,
+			CASE WHEN a.`status` = 1 THEN '可用'
+				 WHEN a.`status` = 0 THEN '不可用'
+			END as `status`,
+			a.club_img,
+			a.introduction,
+			a.area_id,
+			b.`name`
+		from club a,area b
+		where a.area_id = b.id and a.deleted_flag = 0 and a.id = #{id}
+	</select>
+	
+	<!-- 修改俱乐部 -->
+	<update id="updateClud" parameterType="java.util.Map">
+		update club
+		  <set>
+		  	  <if test="map.clubName != null and map.clubName != ''">
+		        club_name = #{map.clubName},
+		      </if>
+		      <if test="map.introduction != null and map.introduction != ''">
+		        introduction = #{map.introduction},
+		      </if>
+		      <if test="map.logo != null and map.logo != ''">
+		        club_img = #{map.logo},
+		      </if>
+		      <if test="map.status != null and map.status != ''">
+		        status = #{map.status},
+		      </if>
+		      <if test="map.areaId != null and map.areaId != ''">
+		        area_id = #{map.areaId},
+		      </if>
+		      <if test="map.contactName != null and map.contactName != ''">
+		        contact_name = #{map.contactName},
+		      </if>
+		      <if test="map.mobile != null and map.mobile != ''">
+		        mobile = #{map.mobile},
+		      </if>
+		      <if test="map.mail != null and map.mail != ''">
+		        mail = #{map.mail}
+		      </if>
+		  </set>
+		where id = #{map.id}
+	</update>
+	
+	<!-- 根据俱乐部id得知此俱乐部下是否有成员 -->
+	<select id="findClubIsCanDelete" resultType="java.lang.Integer">
+		select COUNT(*) as count
+		from club a,player b
+		where a.id = b.club_id and a.id = #{id}
+	</select>
+	
+	<!-- 删除俱乐部 -->
+	<delete id="deleteClub">
+		delete from club where id = #{id}
+	</delete>
+	
+	<resultMap id="BrandResultMap" type="com.hworld.canoe.domain.req.entity.Brand" >
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="brand_img" property="brandImg" jdbcType="VARCHAR" />
+	    <result column="introduction" property="introduction" jdbcType="VARCHAR" />
+	    <result column="status" property="status" jdbcType="VARCHAR" />
+	    <result column="area_id" property="areaId" jdbcType="INTEGER" />
+	    <result column="contact_name" property="contactName" jdbcType="VARCHAR" />
+	    <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+	    <result column="mail" property="mail" jdbcType="VARCHAR" />
+	    <result column="is_sponsor" property="isSponsor" jdbcType="INTEGER" />
+	    <result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+	    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+	    <result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+	    <result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+	    <result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+  	</resultMap>
+	
+	<!-- 查询品牌(多条件) -->
+	<select id="findAllBrandByCondition" resultMap="BrandResultMap">
+		select DISTINCT
+			a.id,
+			a.brand_name,
+			a.area_id,
+			b.`name`,
+			a.contact_name,
+			a.mobile,
+			a.mail,
+			CASE WHEN a.`status` = 1 THEN '可用'
+				 WHEN a.`status` = 0 THEN '不可用'
+			END as `status`,
+			a.modified_by,
+			a.is_sponsor,
+			a.modified_on
+		from brand a left join area b on a.area_id = b.id
+		<where>
+			<if test="map.keyword != null and map.keyword != ''">
+				and a.brand_name like '%${map.keyword}%' or a.contact_name like '%${map.keyword}%' or a.mobile like '%${map.keyword}%'
+			</if>
+			and a.deleted_flag = 0 and b.deleted_flag = 0
+		</where>
+	</select>
+	
+	<!-- 设为赞助商和取消赞助商 -->
+	<update id="updateIsSponsor">
+		update brand
+			<set>
+				<if test="IsSponsor == 0">
+					is_sponsor = 1
+				</if>
+				<if test="IsSponsor == 1">
+					is_sponsor = 0
+				</if>
+			</set>
+		where id = #{id}
+	</update>
+	
+	<!-- 新增品牌 -->
+	<insert id="addBrand">
+		insert into brand
+		VALUES(NULL,#{map.brandName},#{map.logo},null,#{map.status},#{map.areaId},#{map.contactName},#{map.mobile},#{map.mail},0,0,'',NOW(),null,null)
+	</insert>
+	
+	<!-- 根据品牌id查询详情 -->
+	<select id="findBrandById" resultType="com.hworld.canoe.domain.req.vo.setting.BrandDetailOutParam">
+		select DISTINCT
+			a.id,
+			a.brand_name,
+			a.area_id,
+			b.`name`,
+			a.contact_name,
+			a.mobile,
+			a.mail,
+			CASE WHEN a.`status` = 1 THEN '可用'
+				 WHEN a.`status` = 0 THEN '不可用'
+			END as status,
+			a.brand_img
+		from brand a left join area b on a.area_id = b.id
+		where a.deleted_flag = 0 and a.id = #{id}
+	</select>
+	
+	<!-- 修改品牌 -->
+	<update id="updateBrand" parameterType="java.util.Map">
+		update brand
+    	  <set>
+		      <if test="map.brandName != null and map.brandName != ''">
+		        brand_name = #{map.brandName},
+		      </if>
+		      <if test="map.logo != null and map.logo != ''">
+		        brand_img = #{map.logo},
+		      </if>
+		      <if test="map.status != null and map.status != ''">
+		        status = #{map.status},
+		      </if>
+		      <if test="map.areaId != null and map.areaId != ''">
+		        area_id = #{map.areaId},
+		      </if>
+		      <if test="map.contactName != null and map.contactName != ''">
+		        contact_name = #{map.contactName},
+		      </if>
+		      <if test="map.mobile != null and map.mobile != ''">
+		        mobile = #{map.mobile},
+		      </if>
+		      <if test="map.mail != null and map.mail != ''">
+		        mail = #{map.mail}
+		      </if>
+    	  </set>
+        where id = #{map.id}
+	</update>
+	
+	<!-- 删除品牌 -->
+	<delete id="deleteBrand">
+		delete from brand where id = #{id}
+	</delete>
+	
+	<resultMap id="EquipmentResultMap" type="com.hworld.canoe.domain.req.entity.EquipmentType">
+	    <id column="id" property="id" jdbcType="INTEGER" />
+	    <result column="name" property="name" jdbcType="VARCHAR" />
+	    <result column="status" property="status" jdbcType="VARCHAR" />
+	    <result column="deleted_flag" property="deletedFlag" jdbcType="BIGINT" />
+	    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+	    <result column="created_on" property="createdOn" jdbcType="TIMESTAMP" />
+	    <result column="modified_by" property="modifiedBy" jdbcType="VARCHAR" />
+	    <result column="modified_on" property="modifiedOn" jdbcType="TIMESTAMP" />
+  	</resultMap>
+	
+	<!-- 查询器材类型 -->
+	<select id="findAllEquipment" resultMap="EquipmentResultMap">
+		select DISTINCT
+			a.id,
+			a.`name`,
+			CASE WHEN a.`status` = 1 THEN '可用'
+				 WHEN a.`status` = 0 THEN '不可用'
+			END as `status`,
+			a.modified_by,
+			a.modified_on
+		from equipment_type a
+		where a.deleted_flag = 0
+	</select>
+	
+	<!-- 新增惯用器材类型 -->
+	<insert id="addEquipment">
+		insert into equipment_type VALUES(null,#{map.name},1,0,'',NOW(),null,null)
+	</insert>
+	
+	<!-- 根据器材类型id查询详情 -->
+	<select id="findEquipmentById" resultType="com.hworld.canoe.domain.req.vo.setting.EquipmentDetailOutParam">
+		select a.id,a.`name`
+		from equipment_type a
+		where a.deleted_flag = 0 and a.id = #{id}
+	</select>
+	
+	<!-- 修改器材类型 -->
+	<update id="updateEquipment">
+		update equipment_type
+    	  <set>
+		      <if test="map.name != null and map.name != ''">
+		      	name = #{map.name}
+		      </if>
+    	  </set>
+    	where id = #{map.id}
+	</update>
+	
+	<!-- 删除器材类型 -->
+	<delete id="deleteEquipment">
+		delete from equipment_type where id = #{id}
+	</delete>
+
+</mapper>
